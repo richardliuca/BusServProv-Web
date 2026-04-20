@@ -1,0 +1,22 @@
+{
+  "name": "service-provider-web",
+  "version": "1.0.0",
+  "description": "Simple web app for Service Provider Business",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/index.js"
+  },
+  "keywords": [],
+  "author": "Richard Liu",
+  "license": "ISC",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "express": "^4.21.2"
+  },
+  "devDependencies": {
+    "typescript": "^4.5.4"
+  }
+}
