@@ -1,31 +1,137 @@
-name: Service Provider Web
-version: 1.0.0
+name: busservprov
+
 services:
-  web-app:
-    container_name: web-app
-    image: node:18-alpine
-    ports:
-      - 3000:3000
-    working_dir: /app
+  postgres:
+    image: postgres:15-alpine
     environment:
-      NODE_ENV: development
-      NPM_CONFIG_PRODUCTION: "false"
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: temporal
     volumes:
-      - ./app/web:/app
-    command: sh -c "npm install && npm start"
-  # db:
-  #   image: postgres:15-alpine
-  #   ports:
-  #     - 5432:5432
-  #   environment:
-  #     - POSTGRES_USER=postgres
-  #     - POSTGRES_PASSWORD=postgres
-  #     - POSTGRES_DB=service_provider
-  #   volumes:
-  #     - db_data:/var/lib/postgresql/data
-  # nginx:
-  #   image: nginx:alpine
-  #   ports:
-  #     - 80:80
-  #   volumes:
-  #     - ./nginx.conf:/etc/nginx/nginx.conf
+      - postgres_data:/var/lib/postgresql/data
+      - ./infra/postgres/init-app-db.sql:/docker-entrypoint-initdb.d/01-init-app-db.sql
+    networks:
+      - bsp
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres -d temporal']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  elasticsearch:
+    image: elasticsearch:7.17.21
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - 'ES_JAVA_OPTS=-Xms512m -Xmx512m'
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    networks:
+      - bsp
+    healthcheck:
+      test:
+        [
+          'CMD-SHELL',
+          "curl -fsS 'http://localhost:9200/_cluster/health?wait_for_status=yellow&timeout=5s' >/dev/null || exit 1",
+        ]
+      interval: 10s
+      timeout: 10s
+      retries: 30
+
+  temporal:
+    image: temporalio/auto-setup:1.25.2
+    depends_on:
+      postgres:
+        condition: service_healthy
+      elasticsearch:
+        condition: service_healthy
+    environment:
+      - DB=postgres12
+      - DB_PORT=5432
+      - POSTGRES_USER=postgres
+      - POSTGRES_PWD=postgres
+      - POSTGRES_SEEDS=postgres
+      - ENABLE_ES=true
+      - ES_SEEDS=elasticsearch
+      - ES_VERSION=v7
+    networks:
+      - bsp
+
+  temporal-ui:
+    image: temporalio/ui:2.32.0
+    depends_on:
+      - temporal
+    environment:
+      - TEMPORAL_ADDRESS=temporal:7233
+      - TEMPORAL_CORS_ORIGINS=http://localhost
+      # Required when UI is proxied under a path (see infra/nginx default.conf /temporal/).
+      # Without this, the SPA requests /assets/* at site root and Next.js returns HTML → blank UI.
+      - TEMPORAL_UI_PUBLIC_PATH=/temporal
+    networks:
+      - bsp
+
+  api:
+    build:
+      context: .
+      dockerfile: app/api/Dockerfile
+      target: production
+    restart: on-failure
+    environment:
+      PORT: '3001'
+      TEMPORAL_ADDRESS: temporal:7233
+      TEMPORAL_NAMESPACE: default
+      TEMPORAL_TASK_QUEUE: booking
+    networks:
+      - bsp
+    depends_on:
+      - temporal
+
+  worker:
+    build:
+      context: .
+      dockerfile: app/worker/Dockerfile
+      target: production
+    restart: on-failure
+    environment:
+      TEMPORAL_ADDRESS: temporal:7233
+      TEMPORAL_NAMESPACE: default
+      TEMPORAL_TASK_QUEUE: booking
+      WORKFLOWS_PATH: /repo/packages/temporal/src/workflows.ts
+    networks:
+      - bsp
+    depends_on:
+      - temporal
+
+  web:
+    build:
+      context: .
+      dockerfile: app/web/Dockerfile
+      target: production
+    environment:
+      NODE_ENV: production
+    networks:
+      - bsp
+    depends_on:
+      - api
+
+  nginx:
+    image: nginx:1.27-alpine
+    ports:
+      - '80:80'
+    volumes:
+      - ./infra/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    networks:
+      - bsp
+    depends_on:
+      - web
+      - api
+      - temporal-ui
+
+networks:
+  bsp:
+    driver: bridge
+
+volumes:
+  postgres_data:

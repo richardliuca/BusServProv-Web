@@ -1,0 +1,37 @@
+# Development overrides: hot reload for web, API, and worker.
+# Usage: docker compose -f compose.yml -f compose.dev.yml up --build
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: app/web/Dockerfile
+      target: development
+    volumes:
+      - ./:/repo
+      - /repo/node_modules
+      - web_next_cache:/repo/app/web/.next
+    environment:
+      NODE_ENV: development
+      WATCHPACK_POLLING: 'true'
+
+  api:
+    build:
+      context: .
+      dockerfile: app/api/Dockerfile
+      target: development
+    volumes:
+      - ./:/repo
+      - /repo/node_modules
+
+  worker:
+    build:
+      context: .
+      dockerfile: app/worker/Dockerfile
+      target: development
+    volumes:
+      - ./:/repo
+      - /repo/node_modules
+
+volumes:
+  web_next_cache:
