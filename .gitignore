@@ -5,3 +5,4 @@ dist/
 .env.*
 !.env.config
 .DS_Store
+.pylib/
