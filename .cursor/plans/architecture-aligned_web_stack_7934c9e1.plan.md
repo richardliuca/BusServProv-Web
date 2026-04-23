@@ -1,34 +1,41 @@
 ---
+name: ""
+overview: ""
+todos: []
+isProject: false
+---
+
+---
 name: Architecture-aligned web stack
 overview: "Evolve the repo per [architecture.md](architecture.md) with **npm workspaces**, **`packages/temporal`** as the single home for workflows/activities, **minimal Temporal + Elasticsearch** (not a full hand-rolled prod cluster on day one), **one Postgres instance with two databases**, **same-origin** `/api` via NGINX, and a first slice: **business info landing + “create booking request”** wired to Temporal. Browsers hit **only** NGINX; dev uses `next dev` behind it with WebSocket passthrough for HMR."
 todos:
   - id: workspaces-layout
     content: Root `package.json` with **npm** `workspaces: ["app/*","packages/*"]`; add `app/api`, `app/worker`, **`packages/temporal`** (required); replace `app/web` with Next.js.
-    status: pending
+    status: completed
   - id: compose-data-temporal
     content: "Compose: **one Postgres**, **two DBs** (Temporal + app); **Elasticsearch**; **minimal Temporal stack that still uses ES** (e.g. auto-setup wired to ES—not full multi-service cluster initially); Temporal Web UI; healthchecks + network + env files."
-    status: pending
+    status: completed
   - id: nginx-routing
     content: "Add nginx service + infra/nginx config: / → Next, /api → Nest; optional Temporal UI path."
-    status: pending
+    status: completed
   - id: nextjs-app
     content: "Next.js in `app/web`: **business info** home page + control to **create booking request** (same-origin `fetch('/api/...')`); SSR may use internal `http://api:port`; document through NGINX only."
-    status: pending
+    status: completed
   - id: frontend-hot-reload
     content: "Dev hot reload: `next dev` + bind-mounted `app/web`; NGINX is the **only** browser entry (HMR WebSocket headers on `/`); do not map Next to host; document `public/` and global CSS."
-    status: pending
+    status: completed
   - id: nestjs-api
     content: NestJS API; Temporal client; health + **start booking-request workflow** (types/workflows imported from `packages/temporal`).
-    status: pending
+    status: completed
   - id: nestjs-worker
     content: Worker registers **workflows/activities from `packages/temporal`** only; same task queue/namespace as API; implement booking-request activities (stub OK initially).
-    status: pending
+    status: completed
   - id: dockerfiles
     content: Add Dockerfiles (or multi-target) for web, api, worker; root .dockerignore; wire compose build targets.
-    status: pending
+    status: completed
   - id: docs-env
     content: "`.env.config`: two Postgres DBs, Temporal, ES, internal API URL; README: npm workspaces, NGINX-only dev, minimal Temporal+ES, first slice (landing + booking request)."
-    status: pending
+    status: completed
 isProject: false
 ---
 
@@ -49,12 +56,12 @@ These choices are **locked** for the first implementation pass:
 
 | Area | Today | Target ([architecture.md](architecture.md)) |
 |------|--------|-----------------------------------------------|
-| Entry | Direct port 3000 to `web-app` | NGINX on 80/443; `/` → Next.js, `/api` → NestJS |
-| UI | [app/web/src/index.js](app/web/src/index.js) Express “Hello World” | Next.js app |
-| Backend | None | NestJS API (Temporal **client**, start workflows/signals) |
-| Async | None | NestJS **worker** container (`@temporalio/worker`, activities/workflows) |
-| Orchestration | None | **Minimal** Temporal + ES + Web UI initially; architecture’s full multi-service cluster as a later hardening step |
-| Data | Postgres stub commented in [compose.yml](compose.yml) | PostgreSQL for Temporal + app state; Elasticsearch for visibility/search |
+| Entry | **NGINX on port 80** is the browser entry; `/` → Next, `/api/` → Nest, `/temporal/` → Temporal UI | Same (add 443/TLS later if desired) |
+| UI | **Next.js App Router** in `app/web` | Next.js app |
+| Backend | **NestJS API** in `app/api` (Temporal **client**; starts workflows) | NestJS API (Temporal **client**, start workflows/signals) |
+| Async | **Temporal worker** in `app/worker` (`@temporalio/worker`) | Worker container (`@temporalio/worker`, activities/workflows) |
+| Orchestration | **Temporal auto-setup + Elasticsearch visibility + Temporal UI** in Compose | Keep minimal initially; evolve toward full topology as needed |
+| Data | **One Postgres** for Temporal + init script creates an `app` DB | PostgreSQL for Temporal + app state; Elasticsearch for visibility/search |
 
 ```mermaid
 flowchart TB
@@ -68,8 +75,7 @@ flowchart TB
   end
   subgraph temporal [Temporal]
     twui[Temporal_Web_UI]
-    tfe[Temporal_Frontend]
-    tcluster[Temporal_cluster]
+    tfe[Temporal_auto_setup]
   end
   subgraph data [Data]
     pg[PostgreSQL]
@@ -77,12 +83,12 @@ flowchart TB
   end
   nginx -->|"/"| next
   nginx -->|"/api"| api
+  nginx -->|"/temporal"| twui
   next -->|HTTP| api
   api -->|gRPC_7233| tfe
   worker -->|gRPC_7233| tfe
-  twui --> tfe
-  tcluster --> pg
-  tcluster --> es
+  tfe --> pg
+  tfe --> es
 ```
 
 ## 1. Repository layout (monorepo)

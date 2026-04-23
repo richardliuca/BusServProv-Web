@@ -13,10 +13,10 @@ flowchart LR
   B[Browser — e.g. BookingRequestForm] --> N["nginx — /api/ → api:3001"]
   N --> A["app/api — NestJS global prefix /api"]
   A --> T["Temporal server — temporal:7233"]
-  A -->|workflow.start| T
-  W["app/worker — @temporalio/worker"] -->|poll task queue| T
-  W --> P["packages/temporal — bundle workflows.ts"]
-  W --> Act["activities — recordBookingRequest"]
+  A -->|workflow.start: bookingRequestWorkflow| T
+  W["app/worker — @temporalio/worker"] -->|poll taskQueue: booking| T
+  W --> P["packages/temporal/src/workflows.ts — bundleWorkflowCode()"]
+  W --> Act["packages/temporal/src/activities.ts — recordBookingRequest()"]
 ```
 
 ### Practical meaning
@@ -35,9 +35,9 @@ flowchart LR
 | **postgres** | Database for Temporal (and init script creates an `app` DB for future app use). |
 | **elasticsearch** | Temporal visibility / advanced persistence in this stack. |
 | **temporal** | Temporal server (`temporalio/auto-setup`). |
-| **temporal-ui** | Web UI for workflows; nginx exposes it under `/temporal/` (see `TEMPORAL_UI_PUBLIC_PATH`). |
+| **temporal-ui** | Web UI for workflows; nginx exposes it under `/temporal/` (requires `TEMPORAL_UI_PUBLIC_PATH=/temporal`). |
 | **api** | NestJS; env `TEMPORAL_ADDRESS`, `TEMPORAL_NAMESPACE`, `TEMPORAL_TASK_QUEUE`. |
-| **worker** | Runs `app/worker`; bundles workflows from `WORKFLOWS_PATH` (default `/repo/packages/temporal/src/workflows.ts` in Docker). Same Temporal env vars as API for queue/namespace. |
+| **worker** | Runs `app/worker`; bundles workflows from `WORKFLOWS_PATH` (defaults to monorepo `packages/temporal/src/workflows.ts`). Same Temporal env vars as API for queue/namespace. |
 | **web** | Next.js frontend. |
 | **nginx** | Routes `/api/` → API, `/temporal/` → Temporal UI, `/` → Next. |
 
@@ -48,11 +48,11 @@ flowchart LR
 | **HTTP API bootstrap** | `app/api/src/main.ts` | Global prefix `api`, `ValidationPipe`, `PORT` |
 | **Register controllers / providers** | `app/api/src/app.module.ts` | Wires `HealthController`, `BookingRequestsController`, `TemporalClientService` |
 | **Liveness / readiness style check** | `app/api/src/health.controller.ts` | `GET /api/health` |
-| **Create booking → start workflow** | `app/api/src/booking-requests.controller.ts` | `TemporalClientService`, `CreateBookingRequestDto` |
+| **Create booking → start workflow** | `app/api/src/booking-requests.controller.ts` | `TemporalClientService`, `CreateBookingRequestDto`, workflowId `booking-request-<uuid>` |
 | **Request body shape + validation** | `app/api/src/dto/create-booking-request.dto.ts` | `class-validator` decorators |
 | **Temporal client lifecycle** | `app/api/src/temporal-client.service.ts` | Connect retry, namespace, `getClient()` / `getTaskQueue()` / `getWorkflowType()` |
-| **Worker entry + registration** | `app/worker/src/main.ts` | `bundleWorkflowCode`, `Worker.create`, maps `recordBookingRequest` activity |
-| **Workflow definition** | `packages/temporal/src/workflows.ts` | `proxyActivities`, `bookingRequestWorkflow` |
+| **Worker entry + registration** | `app/worker/src/main.ts` | resolves `WORKFLOWS_PATH`, `bundleWorkflowCode`, `Worker.create`, registers `recordBookingRequest` |
+| **Workflow definition** | `packages/temporal/src/workflows.ts` | `proxyActivities`, exported workflow function `bookingRequestWorkflow(details)` |
 | **Activity implementations** | `packages/temporal/src/activities.ts` | Runs in worker, not in API |
 | **Shared constants / package exports** | `packages/temporal/src/constants.ts`, `packages/temporal/src/index.ts` | Package name `@bsp/temporal` |
 | **Reverse proxy paths** | `infra/nginx/default.conf` | `/api/`, `/temporal/`, `/` upstreams |
@@ -61,7 +61,7 @@ flowchart LR
 ### Entry points
 
 - **API process**: `app/api/src/main.ts` → `AppModule`.
-- **Worker process**: `app/worker/src/main.ts` (ESM; resolves workflow file via `WORKFLOWS_PATH` or monorepo-relative default).
+- **Worker process**: `app/worker/src/main.ts` (ESM; resolves workflow file via `WORKFLOWS_PATH` or monorepo-relative default; bundles at startup).
 
 ### Monorepo workspace
 

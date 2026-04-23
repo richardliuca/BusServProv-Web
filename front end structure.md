@@ -12,23 +12,23 @@ On a visit to `/`, Next.js resolves the route, runs the **root layout** (once pe
 flowchart TD
   A[Browser requests /] --> B[next start / production server]
   B --> C["app/web/src/app/layout.tsx — RootLayout"]
-  C --> D["Import global.css — tokens, base styles"]
+  C --> D["Import global.css — Tailwind v4 + Preline sources + app theme"]
   C --> E["Metadata: title, description from AppConfig"]
   C --> F["app/web/src/app/page.tsx — HomePage"]
   F --> G["app/web/src/templates/Base.tsx — page shell + section order"]
-  G --> H1[Hero zone — server]
-  G --> H2[Sponsors — server]
-  G --> H3[VerticalFeatures — server]
-  G --> H4[BookingSection — server wrapper]
-  H4 --> I["app/web/src/components/BookingRequestForm.tsx — client bundle + hydration"]
-  G --> H5[Banner — server]
-  G --> H6[Footer — server]
+  G --> H1[Hero — server]
+  G --> H2[VerticalFeatures (Services) — server]
+  G --> H3[PricingSection — server]
+  G --> H4[Banner — server]
+  G --> H5[Footer (Location) — server]
+  C --> P["app/web/src/components/PrelineProvider.tsx — client; (re)inits Preline on route change"]
 ```
 
 ### Practical meaning
 
 - **Edit structure / order of sections**: `app/web/src/templates/Base.tsx` (this is the single “table of contents” for the landing page).
-- **Site-wide chrome** (document shell, default title/description, global styles): `app/web/src/app/layout.tsx`, `app/web/src/utils/AppConfig.ts`, `app/web/src/styles/global.css`.
+- **Site-wide chrome** (document shell, default title/description, global styles): `app/web/src/app/layout.tsx`, `app/web/src/utils/AppConfig.ts`, `app/web/src/styles/global.css`, `app/web/src/styles/app-theme.css`.
+- **Preline JS behavior** (dropdowns, etc.): `app/web/src/components/PrelineProvider.tsx` (client component imported by `RootLayout`).
 - **Interactive behavior** (form state, `fetch`): `app/web/src/components/BookingRequestForm.tsx` and any other file with `'use client'`.
 - **Look and feel** (colors, spacing, typography): often `app/web/tailwind.config.ts` + `app/web/src/styles/global.css` + the specific section components.
 
@@ -38,11 +38,14 @@ flowchart TD
 |----------------------|-----------------|---------------------|
 | **Top bar / nav + logo** | `app/web/src/templates/Hero.tsx` | `app/web/src/navigation/NavbarTwoColumns.tsx`, `app/web/src/templates/Logo.tsx`, links live in `Hero.tsx` |
 | **Hero headline, subtext, main CTA** | `Hero.tsx` | `app/web/src/hero/HeroOneButton.tsx`, `app/web/src/button/Button.tsx`, `app/web/src/layout/Section.tsx`, `app/web/src/background/Background.tsx` |
-| **“Built with proven tools” strip** | `app/web/src/templates/Sponsors.tsx` | Images under `app/web/public/assets/images/`, `app/web/src/layout/Section.tsx` |
 | **Three feature rows (“Why book with us”)** | `app/web/src/templates/VerticalFeatures.tsx` | `app/web/src/feature/VerticalFeatureRow.tsx`, SVGs in `app/web/public/assets/images/` |
-| **Booking form block** | `app/web/src/templates/BookingSection.tsx` | `app/web/src/components/BookingRequestForm.tsx` (client), `Background`, `Section` |
+| **Pricing strip** | `app/web/src/templates/PricingSection.tsx` | `Background`, `Section` |
 | **Mid-page CTA band** | `app/web/src/templates/Banner.tsx` | `app/web/src/cta/CTABanner.tsx`, `app/web/src/button/Button.tsx` |
 | **Footer** | `app/web/src/templates/Footer.tsx` | `app/web/src/footer/CenteredFooter.tsx`, `app/web/src/footer/FooterCopyright.tsx`, `app/web/src/footer/FooterIconList.tsx`, `Logo` |
+
+### Not currently mounted (but present)
+
+- **Booking request section**: `app/web/src/templates/BookingSection.tsx` contains the `BookingRequestForm` client component, but `Base.tsx` currently does **not** render `<BookingSection />`. If you want the booking workflow starter visible on the home page, add it to `Base.tsx` (and optionally add a nav link to `#booking` in `Hero.tsx`).
 
 ### Entry points
 
