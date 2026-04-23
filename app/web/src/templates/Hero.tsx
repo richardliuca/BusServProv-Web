@@ -1,22 +1,39 @@
 import Link from 'next/link';
 
-import { Background } from '@/background/Background';
+import { GradientBackground } from '@/background/Background';
 import { Button } from '@/button/Button';
 import { HeroOneButton } from '@/hero/HeroOneButton';
 import { Section } from '@/layout/Section';
 import { NavbarTwoColumns } from '@/navigation/NavbarTwoColumns';
+import { AppConfig } from '@/utils/AppConfig';
 import { Logo } from './Logo';
 
 const Hero = () => (
-  <Background color="bg-gray-100">
-    <Section yPadding="py-6">
+  <GradientBackground variant="cornsilk-subtle">
+    <Section id="home" yPadding="py-6">
       <NavbarTwoColumns logo={<Logo xl />}>
         <li>
-          <Link href="#booking">Book</Link>
+          <Link
+            className="text-primary-500 transition-colors hover:text-primary-600"
+            href="#services"
+          >
+            Services
+          </Link>
         </li>
         <li>
-          <Link href="https://github.com/ixartz/Next-JS-Landing-Page-Starter-Template" rel="noopener noreferrer" target="_blank">
-            Template
+          <Link
+            className="text-primary-500 transition-colors hover:text-primary-600"
+            href="#pricing"
+          >
+            Pricing
+          </Link>
+        </li>
+        <li>
+          <Link
+            className="text-primary-500 transition-colors hover:text-primary-600"
+            href="#location"
+          >
+            Location
           </Link>
         </li>
       </NavbarTwoColumns>
@@ -26,19 +43,19 @@ const Hero = () => (
       <HeroOneButton
         title={
           <>
-            {'Trusted service providers\n'}
-            <span className="text-primary-500">for your business & home</span>
+            <span className="text-primary-500">{'Local Chinatown Mom and Pop \n'}</span>
+            <span className="text-black-forest">{'Spa & Massage Therapist'}</span>
           </>
         }
-        description="Book vetted professionals with confidence. Your request runs through a durable workflow so nothing gets lost."
+        description="Come and let us help you relieve stress and relax in serenity."
         button={
-          <Link href="#booking">
-            <Button xl>Create a booking request</Button>
-          </Link>
+          <a href={`tel:${AppConfig.phoneTel}`}>
+            <Button xl>Call or Text us for your appointment !</Button>
+          </a>
         }
       />
     </Section>
-  </Background>
+  </GradientBackground>
 );
 
 export { Hero };

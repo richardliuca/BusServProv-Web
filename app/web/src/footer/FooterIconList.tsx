@@ -5,7 +5,7 @@ type IFooterIconListProps = {
 };
 
 const FooterIconList = (props: IFooterIconListProps) => (
-  <div className="flex flex-wrap gap-3 [&_a]:text-gray-500 [&_a:hover]:text-gray-700 [&_svg]:h-5 [&_svg]:w-5 [&_svg]:fill-current">
+  <div className="flex flex-wrap gap-3 [&_svg]:h-10 [&_svg]:w-10 [&_svg]:fill-current">
     {props.children}
   </div>
 );

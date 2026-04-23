@@ -51,14 +51,14 @@ export function BookingRequestForm() {
 
   return (
     <form
-      className="rounded-lg border border-gray-300 bg-gray-50 p-6 text-left shadow-sm"
+      className="rounded-lg border border-border bg-primary-50 p-6 text-left text-primary-900 shadow-sm"
       onSubmit={onSubmit}
     >
-      <label className="mb-2 block text-sm font-semibold text-gray-800" htmlFor="details">
+      <label className="mb-2 block text-sm font-semibold text-black-forest" htmlFor="details">
         What do you need?
       </label>
       <textarea
-        className="w-full min-h-[8rem] rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+        className="w-full min-h-[8rem] rounded-md border border-border bg-white px-3 py-2 text-primary-900 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
         id="details"
         name="details"
         value={details}

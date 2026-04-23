@@ -1,5 +1,10 @@
-@tailwind base;
+@import 'tailwindcss';
+@config '../../tailwind.config.ts';
 
-@tailwind components;
+/* Preline UI — paths assume hoisted workspace root node_modules */
+@source '../../../../node_modules/preline/dist/*.js';
+@import '../../../../node_modules/preline/variants.css';
+@import '../../../../node_modules/preline/css/themes/olive.css';
 
-@tailwind utilities;
+/* After Preline: set `--primary-*` (and optional `--brand-*`) for the whole app */
+@import './app-theme.css';

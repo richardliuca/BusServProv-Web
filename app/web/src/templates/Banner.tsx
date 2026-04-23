@@ -3,19 +3,25 @@ import Link from 'next/link';
 import { Button } from '@/button/Button';
 import { CTABanner } from '@/cta/CTABanner';
 import { Section } from '@/layout/Section';
+import { AppConfig } from '@/utils/AppConfig';
+
+import { Background } from '@/background/Background';
 
 const Banner = () => (
+  <Background color="bg-cornsilk">
   <Section>
     <CTABanner
-      title="Ready to get on the calendar?"
-      subtitle="Tell us what you need — we will route it through our booking pipeline."
+      title="Looking for some detox and relaxation ?"
+      subtitle="Call or Text us today at (213) 621-2508 to book your appointment !"
       button={
-        <Link href="#booking">
-          <Button>Get started</Button>
-        </Link>
-      }
-    />
-  </Section>
+        <a href={`tel:${AppConfig.phoneTel}`}>
+          <Button variant="emphasis">Get started</Button>
+        </a>
+        }
+      />
+    </Section>
+  </Background>
 );
+
 
 export { Banner };

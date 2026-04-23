@@ -1,0 +1,84 @@
+/*
+ * App theme — Tailwind v4 `@theme` + Preline `--primary-*` aliases.
+ *
+ * Palette (guideline)
+ * - Primary background: #FEFAE0 (Cornsilk)
+ * - Primary accents:      #DDA15E (Tiger’s Eye) · #BC6C25 (darker — CTAs, links)
+ * - Text & structure:     #283618 (headings, body)
+ */
+
+@theme {
+  /* Font sizes */
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+  --text-3xl: 1.875rem;
+  --text-4xl: 2.25rem;
+  --text-5xl: 3rem;
+  --text-6xl: 4rem;
+
+  --leading-hero: 4.5rem;
+
+  /* Warm neutrals (work on cornsilk) */
+  --color-border: #ddd4c4;
+  --color-gray-100: #faf7ec;
+  --color-gray-200: #f0e9d6;
+  --color-gray-300: #ddd4c4;
+  --color-gray-400: #b8b09f;
+  --color-gray-500: #8a8474;
+  --color-gray-600: #5c5a50;
+  --color-gray-700: #454a3e;
+  --color-gray-800: #36402f;
+  --color-gray-900: #283618;
+
+  /* Primary scale: cornsilk → tiger’s eye → structure green */
+  --color-primary-50: #fefae0;
+  --color-primary-100: #fdf6d4;
+  --color-primary-200: #f8edc4;
+  --color-primary-300: #eec591;
+  --color-primary-400: #dda15e;
+  --color-primary-500: #bc6c25;
+  --color-primary-600: #a35c20;
+  --color-primary-700: #8b4f1c;
+  --color-primary-800: #5c3d24;
+  --color-primary-900: #283618;
+  --color-primary-950: #1a2415;
+
+  /* Semantic aliases */
+  --color-cornsilk: var(--color-primary-50);
+  --color-light-caramel: var(--color-primary-400);
+  --color-copper: var(--color-primary-500);
+  --color-black-forest: var(--color-primary-900);
+  /* Secondary natural accent (optional); not in guideline — muted foliage */
+  --color-olive: #5a6b45;
+
+  --color-brand-copper: var(--color-primary-500);
+}
+
+/*
+ * Preline maps `text-primary-*` / `bg-primary-*` to `--primary-*`.
+ */
+:root,
+:root[data-theme='theme-olive'],
+[data-theme='theme-olive'] {
+  --brand-cornsilk: var(--color-cornsilk);
+  --brand-caramel: var(--color-light-caramel);
+  --brand-copper: var(--color-copper);
+  --brand-forest: var(--color-black-forest);
+  --brand-olive: var(--color-olive);
+
+  --primary-50: var(--color-primary-50);
+  --primary-100: var(--color-primary-100);
+  --primary-200: var(--color-primary-200);
+  --primary-300: var(--color-primary-300);
+  --primary-400: var(--color-primary-400);
+  --primary-500: var(--color-primary-500);
+  --primary-600: var(--color-primary-600);
+  --primary-700: var(--color-primary-700);
+  --primary-800: var(--color-primary-800);
+  --primary-900: var(--color-primary-900);
+  --primary-950: var(--color-primary-950);
+}

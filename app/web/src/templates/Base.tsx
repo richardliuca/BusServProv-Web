@@ -1,16 +1,14 @@
 import { Banner } from './Banner';
-import { BookingSection } from './BookingSection';
+import { PricingSection } from './PricingSection';
 import { Footer } from './Footer';
 import { Hero } from './Hero';
-import { Sponsors } from './Sponsors';
 import { VerticalFeatures } from './VerticalFeatures';
 
 const Base = () => (
-  <div className="text-gray-600 antialiased">
+  <div className="text-primary-900 antialiased">
     <Hero />
-    <Sponsors />
     <VerticalFeatures />
-    <BookingSection />
+    <PricingSection />
     <Banner />
     <Footer />
   </div>

@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 
+import { PrelineProvider } from '@/components/PrelineProvider';
 import { AppConfig } from '@/utils/AppConfig';
 
 import '@/styles/global.css';
@@ -16,7 +17,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang={AppConfig.locale}>
-      <body>{children}</body>
+      <body>
+        <PrelineProvider>{children}</PrelineProvider>
+      </body>
     </html>
   );
 }

@@ -4,7 +4,7 @@ import { Section } from '@/layout/Section';
 
 const BookingSection = () => (
   <div id="booking">
-    <Background color="bg-white">
+    <Background color="bg-cornsilk">
       <Section
         title="Request a booking"
         description="Describe what you need. We start a Temporal workflow so your request is tracked end to end."
