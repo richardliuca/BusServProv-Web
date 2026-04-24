@@ -12,8 +12,8 @@ const VerticalFeatures = () => (
       <VerticalFeatureRow
         title="Reflexology"
         description="Unlocking your body’s natural healing through the map of your soles"
-        image="/assets/images/feature.svg"
-        imageAlt="Vetted providers"
+        image="/assets/images/reflexology.png"
+        imageAlt="foot massage"
       />
       <VerticalFeatureRow
         title="Meridian Acupressure Massage"

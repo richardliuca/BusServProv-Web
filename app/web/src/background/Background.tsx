@@ -36,3 +36,43 @@ const GradientBackground = (props: IGradientBackgroundProps) => (
 );
 
 export { GradientBackground };
+
+/** Full class strings for Tailwind JIT (no dynamic `from-${…}`). */
+const imageBackgroundOverlayClasses = {
+  /** Gentle vertical scrim: slightly darker top and bottom for nav + hero copy. */
+  'soft-vignette':
+    'pointer-events-none absolute inset-0 bg-gradient-to-b from-black/15 via-white/10 to-white/15',
+  /** Darker lift from the bottom only; leaves the top lighter for the photo to breathe. */
+  'bottom-scrim':
+    'pointer-events-none absolute inset-0 bg-gradient-to-t from-primary-950/60 via-primary-950/20 to-transparent',
+} as const;
+
+export type ImageBackgroundOverlayVariant = keyof typeof imageBackgroundOverlayClasses;
+
+type IImageBackgroundProps = {
+  children: ReactNode;
+  /** Public path (e.g. `/assets/hero_blur.jpg`) or full URL for `background-image`. */
+  src: string;
+  /** Extra classes on the wrapper (layout, min-height, etc.). */
+  className?: string;
+  /** Optional gradient layer above the photo, below children, for text contrast. */
+  overlayVariant?: ImageBackgroundOverlayVariant;
+};
+
+const ImageBackground = (props: IImageBackgroundProps) => {
+  const overlay = props.overlayVariant;
+
+  return (
+    <div
+      className={`relative bg-cover bg-center bg-no-repeat ${props.className ?? ''}`.trim()}
+      style={{ backgroundImage: `url(${JSON.stringify(props.src)})` }}
+    >
+      {overlay !== undefined && (
+        <div className={imageBackgroundOverlayClasses[overlay]} aria-hidden />
+      )}
+      <div className="relative z-10">{props.children}</div>
+    </div>
+  );
+};
+
+export { ImageBackground };

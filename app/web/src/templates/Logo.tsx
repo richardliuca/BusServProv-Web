@@ -2,6 +2,8 @@ import { AppConfig } from '../utils/AppConfig';
 
 type ILogoProps = {
   xl?: boolean;
+  /** Use when logo is rendered on a dark/photo background. */
+  onDark?: boolean;
 };
 
 const Logo = (props: ILogoProps) => {
@@ -9,9 +11,12 @@ const Logo = (props: ILogoProps) => {
   const fontStyle = props.xl
     ? 'font-semibold text-3xl'
     : 'font-semibold text-xl';
+  const colorStyle = props.onDark
+    ? 'text-cornsilk drop-shadow-[0_2px_8px_rgba(0,0,0,0.55)]'
+    : 'text-black-forest';
 
   return (
-    <span className={`inline-flex items-center text-black-forest ${fontStyle}`}>
+    <span className={`inline-flex items-center ${colorStyle} ${fontStyle}`}>
       <img
         className="mr-2 inline-block"
         src="/assets/logo/logo.png"
