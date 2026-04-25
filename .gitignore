@@ -6,3 +6,6 @@ dist/
 !.env.config
 .DS_Store
 .pylib/
+
+# Next/TypeScript incremental build artifacts
+app/web/tsconfig.tsbuildinfo

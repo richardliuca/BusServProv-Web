@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import Image from 'next/image';
 
 type IBackgroundProps = {
   children: ReactNode;
@@ -53,8 +54,14 @@ type IImageBackgroundProps = {
   children: ReactNode;
   /** Public path (e.g. `/assets/hero_blur.jpg`) or full URL for `background-image`. */
   src: string;
+  /** Used for `next/image` accessibility; decorative backgrounds can pass `alt=""`. */
+  alt?: string;
   /** Extra classes on the wrapper (layout, min-height, etc.). */
   className?: string;
+  /** Preload/priority for above-the-fold hero images. */
+  priority?: boolean;
+  /** Responsive sizes hint for the background image. */
+  sizes?: string;
   /** Optional gradient layer above the photo, below children, for text contrast. */
   overlayVariant?: ImageBackgroundOverlayVariant;
 };
@@ -63,10 +70,15 @@ const ImageBackground = (props: IImageBackgroundProps) => {
   const overlay = props.overlayVariant;
 
   return (
-    <div
-      className={`relative bg-cover bg-center bg-no-repeat ${props.className ?? ''}`.trim()}
-      style={{ backgroundImage: `url(${JSON.stringify(props.src)})` }}
-    >
+    <div className={`relative overflow-hidden ${props.className ?? ''}`.trim()}>
+      <Image
+        src={props.src}
+        alt={props.alt ?? ''}
+        fill
+        priority={props.priority}
+        sizes={props.sizes ?? '100vw'}
+        className="object-cover object-center"
+      />
       {overlay !== undefined && (
         <div className={imageBackgroundOverlayClasses[overlay]} aria-hidden />
       )}
