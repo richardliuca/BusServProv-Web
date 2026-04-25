@@ -1,1 +1,14 @@
 node_modules/
+.next/
+dist/
+.env
+.env.*
+!.env.config
+.DS_Store
+.pylib/
+
+# Next/TypeScript incremental build artifacts
+app/web/tsconfig.tsbuildinfo
+
+# Secrets
+infra/secrets/cloudflare.ini

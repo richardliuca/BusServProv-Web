@@ -1,0 +1,5 @@
+@import 'tailwindcss';
+@config '../../tailwind.config.ts';
+
+/* Theme tokens */
+@import './app-theme.css';

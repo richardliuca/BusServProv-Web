@@ -1,31 +1,196 @@
-name: Service Provider Web
-version: 1.0.0
+# Profiles (pick one):
+#   docker compose -f compose.yml --profile Temporal up --build   — full stack
+#   docker compose -f compose.yml --profile web up --build      — Next.js + nginx only (/api/* and /temporal/ 502 until full stack runs)
+name: busservprov
+
 services:
-  web-app:
-    container_name: web-app
-    image: node:18-alpine
-    ports:
-      - 3000:3000
-    working_dir: /app
+  postgres:
+    profiles:
+      - Temporal
+    image: postgres:15-alpine
+    logging:
+      driver: json-file
+      options:
+        max-size: 20m
+        max-file: '3'
     environment:
-      NODE_ENV: development
-      NPM_CONFIG_PRODUCTION: "false"
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: temporal
     volumes:
-      - ./app/web:/app
-    command: sh -c "npm install && npm start"
-  # db:
-  #   image: postgres:15-alpine
-  #   ports:
-  #     - 5432:5432
-  #   environment:
-  #     - POSTGRES_USER=postgres
-  #     - POSTGRES_PASSWORD=postgres
-  #     - POSTGRES_DB=service_provider
-  #   volumes:
-  #     - db_data:/var/lib/postgresql/data
-  # nginx:
-  #   image: nginx:alpine
-  #   ports:
-  #     - 80:80
-  #   volumes:
-  #     - ./nginx.conf:/etc/nginx/nginx.conf
+      - postgres_data:/var/lib/postgresql/data
+      - ./infra/postgres/init-app-db.sql:/docker-entrypoint-initdb.d/01-init-app-db.sql
+    networks:
+      - bsp
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres -d temporal']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  elasticsearch:
+    profiles:
+      - Temporal
+    image: elasticsearch:7.17.21
+    logging:
+      driver: json-file
+      options:
+        max-size: 20m
+        max-file: '3'
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - 'ES_JAVA_OPTS=-Xms512m -Xmx512m'
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    networks:
+      - bsp
+    healthcheck:
+      test:
+        [
+          'CMD-SHELL',
+          "curl -fsS 'http://localhost:9200/_cluster/health?wait_for_status=yellow&timeout=5s' >/dev/null || exit 1",
+        ]
+      interval: 10s
+      timeout: 10s
+      retries: 30
+
+  temporal:
+    profiles:
+      - Temporal
+    image: temporalio/auto-setup:1.25.2
+    logging:
+      driver: json-file
+      options:
+        max-size: 20m
+        max-file: '3'
+    depends_on:
+      postgres:
+        condition: service_healthy
+      elasticsearch:
+        condition: service_healthy
+    environment:
+      - DB=postgres12
+      - DB_PORT=5432
+      - POSTGRES_USER=postgres
+      - POSTGRES_PWD=postgres
+      - POSTGRES_SEEDS=postgres
+      - ENABLE_ES=true
+      - ES_SEEDS=elasticsearch
+      - ES_VERSION=v7
+    networks:
+      - bsp
+
+  temporal-ui:
+    profiles:
+      - Temporal
+    image: temporalio/ui:2.32.0
+    logging:
+      driver: json-file
+      options:
+        max-size: 20m
+        max-file: '3'
+    depends_on:
+      - temporal
+    environment:
+      - TEMPORAL_ADDRESS=temporal:7233
+      - TEMPORAL_CORS_ORIGINS=http://localhost
+      # Required when UI is proxied under a path (see infra/nginx default.conf /temporal/).
+      # Without this, the SPA requests /assets/* at site root and Next.js returns HTML → blank UI.
+      - TEMPORAL_UI_PUBLIC_PATH=/temporal
+    networks:
+      - bsp
+
+  api:
+    profiles:
+      - Temporal
+    build:
+      context: .
+      dockerfile: app/api/Dockerfile
+      target: production
+    logging:
+      driver: json-file
+      options:
+        max-size: 20m
+        max-file: '3'
+    restart: on-failure
+    environment:
+      PORT: '3001'
+      TEMPORAL_ENABLED: 'true'
+      TEMPORAL_ADDRESS: temporal:7233
+      TEMPORAL_NAMESPACE: default
+      TEMPORAL_TASK_QUEUE: booking
+    networks:
+      - bsp
+    depends_on:
+      - temporal
+
+  worker:
+    profiles:
+      - Temporal
+    build:
+      context: .
+      dockerfile: app/worker/Dockerfile
+      target: production
+    logging:
+      driver: json-file
+      options:
+        max-size: 20m
+        max-file: '3'
+    restart: on-failure
+    environment:
+      TEMPORAL_ADDRESS: temporal:7233
+      TEMPORAL_NAMESPACE: default
+      TEMPORAL_TASK_QUEUE: booking
+      WORKFLOWS_PATH: /repo/packages/temporal/src/workflows.ts
+    networks:
+      - bsp
+    depends_on:
+      - temporal
+
+  web:
+    profiles:
+      - Temporal
+      - web
+    build:
+      context: .
+      dockerfile: app/web/Dockerfile
+      target: production
+    logging:
+      driver: json-file
+      options:
+        max-size: 20m
+        max-file: '3'
+    environment:
+      NODE_ENV: production
+    networks:
+      - bsp
+
+  nginx:
+    profiles:
+      - Temporal
+      - web
+    build:
+      context: ./infra/nginx
+      dockerfile: Dockerfile
+    logging:
+      driver: json-file
+      options:
+        max-size: 20m
+        max-file: '3'
+    ports:
+      - '80:80'
+      - '443:443'
+    networks:
+      - bsp
+    depends_on:
+      - web
+
+networks:
+  bsp:
+    driver: bridge
+
+volumes:
+  postgres_data:
