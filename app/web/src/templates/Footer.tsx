@@ -11,6 +11,17 @@ const Footer = () => (
     >
       <CenteredFooter
         logo={<Logo />}
+        belowNav={
+          <p>
+            {"We're located in Chinatown"}
+            <br />
+            {'685 N Spring Street #C,'}
+            <br />
+            {'Los Angeles, CA 90012'}
+            <br />
+            {'Visit us or see our reviews!'}
+          </p>
+        }
         iconList={
           <>
             <a
@@ -54,17 +65,7 @@ const Footer = () => (
             </a>
           </>
         }
-      >
-        <p>
-          {"We're located in Chinatown"}
-          <br />
-          {'685 N Spring Street #C,'}
-          <br />
-          {'Los Angeles, CA 90012'}
-          <br />
-          {'Visit us or see our reviews!'}
-        </p>
-      </CenteredFooter>
+      />
     </Section>
   </Background>
 );

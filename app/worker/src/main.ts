@@ -1,10 +1,7 @@
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import * as path from 'node:path';
 import { NativeConnection, Worker, bundleWorkflowCode } from '@temporalio/worker';
 import { recordBookingRequest } from '@bsp/temporal/activities';
 import { BOOKING_TASK_QUEUE, TEMPORAL_NAMESPACE } from '@bsp/temporal';
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 function resolveWorkflowsPath(): string {
   const envPath = process.env.WORKFLOWS_PATH;
