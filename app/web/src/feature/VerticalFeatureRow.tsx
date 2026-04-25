@@ -6,6 +6,7 @@ type IVerticalFeatureRowProps = {
   description: string;
   image: string;
   imageAlt: string;
+  imageClassName?: string;
   reverse?: boolean;
 };
 
@@ -27,12 +28,13 @@ const VerticalFeatureRow = (props: IVerticalFeatureRowProps) => {
         <div className="mt-6 text-xl leading-9 text-primary-900">{props.description}</div>
       </div>
 
-      <div className="relative h-56 w-full p-6 sm:w-1/2 sm:h-72">
+      <div className="relative h-56 w-full p-6 sm:h-72 sm:w-1/2">
         <Image
           src={props.image}
           alt={props.imageAlt}
           fill
-          className="object-contain"
+          style={{ objectFit: 'contain' }}
+          className={classNames('object-contain', props.imageClassName)}
           sizes="(max-width: 640px) 100vw, 50vw"
         />
       </div>

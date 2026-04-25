@@ -9,7 +9,7 @@ import { AppConfig } from '@/utils/AppConfig';
 import { Logo } from './Logo';
 
 const Hero = () => (
-  <ImageBackground src="/assets/images/hero_blur.jpg" overlayVariant="soft-vignette">
+  <ImageBackground src="/assets/images/hero_bg.webp" overlayVariant="soft-vignette">
     <Section id="home" yPadding="py-6">
       <NavbarTwoColumns logo={<Logo xl onDark />}>
         <li>
