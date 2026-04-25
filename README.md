@@ -28,8 +28,16 @@ npm run build -w @bsp/api -w @bsp/worker -w @bsp/web
 
 All browser traffic goes through **NGINX on port 80** (including Next.js HMR WebSockets). Do not rely on publishing the Next container to the host.
 
+Compose uses **named profiles** on [compose.yml](compose.yml): **`Temporal`** (full stack) and **`web`** (Next.js + nginx only).
+
 ```bash
-docker compose -f compose.yml -f compose.dev.yml up --build
+docker compose -f compose.yml -f compose.dev.yml --profile Temporal up --build
+```
+
+Web UI only (no API / Temporal containers):
+
+```bash
+docker compose -f compose.yml -f compose.dev.yml --profile web up --build
 ```
 
 Then open **http://localhost/** — landing page with business copy and **Create booking request**. The form posts to **`/api/booking-requests`** (same origin); NGINX forwards `/api/` to the API service.
@@ -42,7 +50,13 @@ The dev override file bind-mounts the repo and uses **development** Docker build
 ## Production-style images (no hot reload)
 
 ```bash
-docker compose -f compose.yml up --build
+docker compose -f compose.yml --profile Temporal up --build
+```
+
+Web + nginx only:
+
+```bash
+docker compose -f compose.yml --profile web up --build
 ```
 
 Uses `production` targets for `web`, `api`, and `worker`.

@@ -7,7 +7,7 @@ const BookingSection = () => (
     <Background color="bg-cornsilk">
       <Section
         title="Request a booking"
-        description="Describe what you need. We start a Temporal workflow so your request is tracked end to end."
+        description=""
       >
         <div className="mx-auto max-w-xl">
           <BookingRequestForm />

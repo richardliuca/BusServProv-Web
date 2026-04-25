@@ -1,5 +1,7 @@
 # Development overrides: hot reload for web, API, and worker.
-# Usage: docker compose -f compose.yml -f compose.dev.yml up --build
+# Usage (pick a profile):
+#   docker compose -f compose.yml -f compose.dev.yml --profile Temporal up --build
+#   docker compose -f compose.yml -f compose.dev.yml --profile web up --build
 
 services:
   web:

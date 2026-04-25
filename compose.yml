@@ -1,7 +1,12 @@
+# Profiles (pick one):
+#   docker compose -f compose.yml --profile Temporal up --build   — full stack
+#   docker compose -f compose.yml --profile web up --build      — Next.js + nginx only (/api/* and /temporal/ 502 until full stack runs)
 name: busservprov
 
 services:
   postgres:
+    profiles:
+      - Temporal
     image: postgres:15-alpine
     logging:
       driver: json-file
@@ -24,6 +29,8 @@ services:
       retries: 10
 
   elasticsearch:
+    profiles:
+      - Temporal
     image: elasticsearch:7.17.21
     logging:
       driver: json-file
@@ -51,6 +58,8 @@ services:
       retries: 30
 
   temporal:
+    profiles:
+      - Temporal
     image: temporalio/auto-setup:1.25.2
     logging:
       driver: json-file
@@ -75,6 +84,8 @@ services:
       - bsp
 
   temporal-ui:
+    profiles:
+      - Temporal
     image: temporalio/ui:2.32.0
     logging:
       driver: json-file
@@ -93,6 +104,8 @@ services:
       - bsp
 
   api:
+    profiles:
+      - Temporal
     build:
       context: .
       dockerfile: app/api/Dockerfile
@@ -105,6 +118,7 @@ services:
     restart: on-failure
     environment:
       PORT: '3001'
+      TEMPORAL_ENABLED: 'true'
       TEMPORAL_ADDRESS: temporal:7233
       TEMPORAL_NAMESPACE: default
       TEMPORAL_TASK_QUEUE: booking
@@ -114,6 +128,8 @@ services:
       - temporal
 
   worker:
+    profiles:
+      - Temporal
     build:
       context: .
       dockerfile: app/worker/Dockerfile
@@ -135,6 +151,9 @@ services:
       - temporal
 
   web:
+    profiles:
+      - Temporal
+      - web
     build:
       context: .
       dockerfile: app/web/Dockerfile
@@ -148,10 +167,11 @@ services:
       NODE_ENV: production
     networks:
       - bsp
-    depends_on:
-      - api
 
   nginx:
+    profiles:
+      - Temporal
+      - web
     image: nginx:1.27-alpine
     logging:
       driver: json-file
@@ -166,8 +186,6 @@ services:
       - bsp
     depends_on:
       - web
-      - api
-      - temporal-ui
 
 networks:
   bsp:

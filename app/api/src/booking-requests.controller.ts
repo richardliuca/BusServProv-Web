@@ -3,6 +3,7 @@ import {
   Controller,
   InternalServerErrorException,
   Post,
+  ServiceUnavailableException,
 } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
 import { CreateBookingRequestDto } from './dto/create-booking-request.dto';
@@ -14,6 +15,11 @@ export class BookingRequestsController {
 
   @Post()
   async create(@Body() body: CreateBookingRequestDto) {
+    if (!this.temporal.isTemporalReady()) {
+      throw new ServiceUnavailableException(
+        'Temporal is disabled or not connected; booking requests are unavailable.',
+      );
+    }
     const client = this.temporal.getClient();
     const workflowId = `booking-request-${randomUUID()}`;
     const taskQueue = this.temporal.getTaskQueue();

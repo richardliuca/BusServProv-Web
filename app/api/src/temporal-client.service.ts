@@ -11,7 +11,18 @@ export class TemporalClientService implements OnModuleInit, OnModuleDestroy {
   private connection: Connection | null = null;
   private client: Client | null = null;
 
+  isTemporalEnabled(): boolean {
+    return process.env.TEMPORAL_ENABLED !== 'false';
+  }
+
+  isTemporalReady(): boolean {
+    return this.client !== null;
+  }
+
   async onModuleInit() {
+    if (!this.isTemporalEnabled()) {
+      return;
+    }
     const address = process.env.TEMPORAL_ADDRESS ?? 'temporal:7233';
     const attempts = Number(process.env.TEMPORAL_CONNECT_ATTEMPTS ?? '40');
     const delayMs = Number(process.env.TEMPORAL_CONNECT_DELAY_MS ?? '2000');
