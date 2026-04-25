@@ -61,6 +61,73 @@ docker compose -f compose.yml --profile web up --build
 
 Uses `production` targets for `web`, `api`, and `worker`.
 
+## Production TLS (Let’s Encrypt via Cloudflare DNS-01)
+
+Production uses **DNS-01** validation via Cloudflare, with a **named volume** shared between:
+
+- `certbot` (read/write) at `/etc/letsencrypt`
+- `nginx` (read-only) at `/etc/letsencrypt`
+
+The production overlay does **not** run a renewal daemon. Renewal is handled by a **host cron** job that runs Certbot and reloads nginx.
+
+### 1) Create Cloudflare API token
+
+In Cloudflare: **My Profile → API Tokens → Create Token**.
+
+- Permissions: **Zone → DNS → Edit**
+- Scope: zone **`panda-massage.com`**
+
+### 2) Create credentials file on the server
+
+Copy the example and insert your token:
+
+```bash
+cp infra/secrets/cloudflare.ini infra/secrets/cloudflare.ini
+chmod 600 infra/secrets/cloudflare.ini
+```
+
+### 3) First-time certificate issuance (must happen before nginx starts with prod config)
+
+The production nginx config references:
+
+- `/etc/letsencrypt/live/panda-massage.com/fullchain.pem`
+- `/etc/letsencrypt/live/panda-massage.com/privkey.pem`
+
+If those files are missing, nginx will fail to start. Run the one-shot issuance first:
+
+```bash
+docker compose -f compose.yml -f compose.prod.yml --profile production run --rm certbot \
+  certonly \
+  --dns-cloudflare \
+  --dns-cloudflare-credentials /etc/letsencrypt/cloudflare.ini \
+  -d panda-massage.com -d www.panda-massage.com \
+  --email richardliuca@gmail.com \
+  --agree-tos \
+  --non-interactive
+```
+
+Optional verification (does not modify live certs):
+
+```bash
+docker compose -f compose.yml -f compose.prod.yml --profile production run --rm certbot renew --dry-run
+```
+
+### 4) Start the production stack
+
+Use the base compose plus the production overlay:
+
+```bash
+docker compose -f compose.yml -f compose.prod.yml --profile web --profile production up -d --build
+```
+
+### 5) Renewals via cron
+
+Install a cron entry on the droplet to renew and reload nginx (path must match where the repo is cloned):
+
+```bash
+15 3,15 * * * /absolute/path/to/BusServProv-Web/infra/scripts/renew-letsencrypt.sh >>/var/log/bsp-certbot-renew.log 2>&1
+```
+
 ## Environment variables
 
 See [.env.config](.env.config) for names used by services. Compose injects Temporal and API settings inline; override with an `env_file` if you prefer.

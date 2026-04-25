@@ -7,3 +7,7 @@ RUN apk add --no-cache openssl \
     -out /etc/nginx/ssl/server.crt \
     -subj "/CN=localhost" \
     -addext "subjectAltName=DNS:localhost,DNS:*.localhost,IP:127.0.0.1,IP:::1"
+
+# Bake the default nginx config into the image so Compose overlays can mount a
+# production `default.conf` without volume-merge collisions.
+COPY default.conf /etc/nginx/conf.d/default.conf
