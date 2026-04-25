@@ -1,4 +1,4 @@
-FROM node:20-bookworm-slim AS deps
+FROM docker.io/library/node:20-bookworm-slim AS deps
 WORKDIR /repo
 COPY package.json package-lock.json* ./
 COPY packages/temporal/package.json ./packages/temporal/
@@ -14,7 +14,7 @@ ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=development
 CMD ["sh", "-c", "cd /repo && npm ci && npm run build -w @bsp/temporal && cd app/web && npm run dev -- --hostname 0.0.0.0 --port 3000"]
 
-FROM node:20-bookworm-slim AS production
+FROM docker.io/library/node:20-bookworm-slim AS production
 WORKDIR /repo
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1

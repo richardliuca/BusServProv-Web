@@ -11,7 +11,7 @@ services:
   certbot:
     profiles:
       - production
-    image: certbot/dns-cloudflare:latest
+    image: docker.io/certbot/dns-cloudflare:latest
     volumes:
       - letsencrypt_certs:/etc/letsencrypt
       - ./infra/secrets/cloudflare.ini:/etc/letsencrypt/cloudflare.ini:ro

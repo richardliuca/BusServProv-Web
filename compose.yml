@@ -7,7 +7,7 @@ services:
   postgres:
     profiles:
       - Temporal
-    image: postgres:15-alpine
+    image: docker.io/library/postgres:15-alpine
     logging:
       driver: json-file
       options:
@@ -31,7 +31,7 @@ services:
   elasticsearch:
     profiles:
       - Temporal
-    image: elasticsearch:7.17.21
+    image: docker.io/library/elasticsearch:7.17.21
     logging:
       driver: json-file
       options:
@@ -60,7 +60,7 @@ services:
   temporal:
     profiles:
       - Temporal
-    image: temporalio/auto-setup:1.25.2
+    image: docker.io/temporalio/auto-setup:1.25.2
     logging:
       driver: json-file
       options:
@@ -86,7 +86,7 @@ services:
   temporal-ui:
     profiles:
       - Temporal
-    image: temporalio/ui:2.32.0
+    image: docker.io/temporalio/ui:2.32.0
     logging:
       driver: json-file
       options:
