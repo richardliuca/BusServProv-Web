@@ -3,6 +3,11 @@ name: busservprov
 services:
   postgres:
     image: postgres:15-alpine
+    logging:
+      driver: json-file
+      options:
+        max-size: 20m
+        max-file: '3'
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
@@ -20,6 +25,11 @@ services:
 
   elasticsearch:
     image: elasticsearch:7.17.21
+    logging:
+      driver: json-file
+      options:
+        max-size: 20m
+        max-file: '3'
     environment:
       - discovery.type=single-node
       - xpack.security.enabled=false
@@ -42,6 +52,11 @@ services:
 
   temporal:
     image: temporalio/auto-setup:1.25.2
+    logging:
+      driver: json-file
+      options:
+        max-size: 20m
+        max-file: '3'
     depends_on:
       postgres:
         condition: service_healthy
@@ -61,6 +76,11 @@ services:
 
   temporal-ui:
     image: temporalio/ui:2.32.0
+    logging:
+      driver: json-file
+      options:
+        max-size: 20m
+        max-file: '3'
     depends_on:
       - temporal
     environment:
@@ -77,6 +97,11 @@ services:
       context: .
       dockerfile: app/api/Dockerfile
       target: production
+    logging:
+      driver: json-file
+      options:
+        max-size: 20m
+        max-file: '3'
     restart: on-failure
     environment:
       PORT: '3001'
@@ -93,6 +118,11 @@ services:
       context: .
       dockerfile: app/worker/Dockerfile
       target: production
+    logging:
+      driver: json-file
+      options:
+        max-size: 20m
+        max-file: '3'
     restart: on-failure
     environment:
       TEMPORAL_ADDRESS: temporal:7233
@@ -109,6 +139,11 @@ services:
       context: .
       dockerfile: app/web/Dockerfile
       target: production
+    logging:
+      driver: json-file
+      options:
+        max-size: 20m
+        max-file: '3'
     environment:
       NODE_ENV: production
     networks:
@@ -118,6 +153,11 @@ services:
 
   nginx:
     image: nginx:1.27-alpine
+    logging:
+      driver: json-file
+      options:
+        max-size: 20m
+        max-file: '3'
     ports:
       - '80:80'
     volumes:
