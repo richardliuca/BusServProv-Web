@@ -7,6 +7,69 @@ Monorepo for a service-provider web app: **Next.js** UI, **NestJS** API, **Tempo
 - Docker with Compose v2
 - Node 20+ (for local installs without Docker)
 
+## Using Podman (macOS) instead of Docker
+
+This repo works with **Podman** as the container runtime (via `podman machine`). One important difference from Docker Desktop: when running **rootless** containers, Podman cannot publish **privileged host ports** (<1024) by default. Since this stack publishes **HTTP/HTTPS on ports 80/443** (NGINX is the single browser entry), you have two options:
+
+### Option A (recommended): allow ports 80/443 for rootless Podman (persistent)
+
+Configure the **Podman machine VM** kernel setting (not macOS) to allow unprivileged port binds starting at 80.
+
+```bash
+# enter the Podman VM
+podman machine ssh
+
+# apply immediately (until reboot)
+sudo sysctl -w net.ipv4.ip_unprivileged_port_start=80
+
+# persist across reboots (drop-in sysctl file)
+echo "net.ipv4.ip_unprivileged_port_start=80" | sudo tee /etc/sysctl.d/99-unprivileged-ports.conf
+sudo sysctl --system
+```
+
+If you still see bind errors after persisting the sysctl, restart the VM:
+
+```bash
+podman machine stop
+podman machine start
+```
+
+### Option B: use a rootful Podman machine
+
+Run a **rootful** Podman machine/session so privileged ports can be published without changing `net.ipv4.ip_unprivileged_port_start`.
+
+```bash
+podman machine init --rootful
+podman machine start
+```
+
+After either option, the existing Compose port mappings (`80:80` and `443:443`) should work as-is.
+
+## Using Podman on Ubuntu (Linux host)
+
+On Ubuntu, Podman runs directly on the **host Linux kernel** (no `podman machine` VM). The same privileged-port rule applies for **rootless** containers: publishing host ports **<1024** (like 80/443) will fail unless you change the host’s unprivileged port range.
+
+### Option A (recommended): allow ports 80/443 for rootless Podman (persistent)
+
+Set the sysctl on the **Ubuntu host**:
+
+```bash
+# apply immediately (until reboot)
+sudo sysctl -w net.ipv4.ip_unprivileged_port_start=80
+
+# persist across reboots (drop-in sysctl file)
+echo "net.ipv4.ip_unprivileged_port_start=80" | sudo tee /etc/sysctl.d/99-unprivileged-ports.conf
+sudo sysctl --system
+```
+
+### Option B: run Podman rootful
+
+If you don’t want to change the sysctl, run Podman **rootful** on Ubuntu (privileged port publishing works normally):
+
+```bash
+sudo podman compose -f compose.yml -f compose.dev.yml --profile web up --build
+```
+
 ## Repository layout (npm workspaces)
 
 | Path | Role |
