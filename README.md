@@ -26,7 +26,7 @@ npm run build -w @bsp/api -w @bsp/worker -w @bsp/web
 
 ## Run the full stack (recommended: dev + hot reload)
 
-All browser traffic goes through **NGINX on port 80** (including Next.js HMR WebSockets). Do not rely on publishing the Next container to the host.
+All browser traffic goes through **NGINX** on **ports 80 and 443**: HTTP is redirected to HTTPS (including Next.js HMR WebSockets). The image ships a **self-signed** TLS certificate (your browser will warn until you accept it). Do not rely on publishing the Next container to the host.
 
 Compose uses **named profiles** on [compose.yml](compose.yml): **`Temporal`** (full stack) and **`web`** (Next.js + nginx only).
 
@@ -40,10 +40,10 @@ Web UI only (no API / Temporal containers):
 docker compose -f compose.yml -f compose.dev.yml --profile web up --build
 ```
 
-Then open **http://localhost/** — landing page with business copy and **Create booking request**. The form posts to **`/api/booking-requests`** (same origin); NGINX forwards `/api/` to the API service.
+Then open **https://localhost/** — landing page with business copy and **Create booking request**. The form posts to **`/api/booking-requests`** (same origin); NGINX forwards `/api/` to the API service.
 
-- Health: `GET http://localhost/api/health`
-- Temporal Web UI (proxied): **http://localhost/temporal/** — requires `TEMPORAL_UI_PUBLIC_PATH=/temporal` on the UI container (set in [compose.yml](compose.yml)) so scripts and routes load under `/temporal/`, not the site root.
+- Health: `GET https://localhost/api/health`
+- Temporal Web UI (proxied): **https://localhost/temporal/** — requires `TEMPORAL_UI_PUBLIC_PATH=/temporal` on the UI container (set in [compose.yml](compose.yml)) so scripts and routes load under `/temporal/`, not the site root.
 
 The dev override file bind-mounts the repo and uses **development** Docker build targets so `next dev`, `nest start --watch`, and `tsx watch` run inside containers. An anonymous volume keeps **`/repo/node_modules`** so host bind mounts do not wipe installed dependencies.
 
