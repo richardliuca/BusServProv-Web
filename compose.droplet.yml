@@ -1,0 +1,54 @@
+# Pull-only `web` + `nginx` for small VMs (e.g. 1 GB DO): no `next build` on the droplet.
+#
+# 1) On a builder (CI, laptop, larger droplet), build and push the production web image, e.g.:
+#    docker build -f app/web/Dockerfile --target production -t registry.example.com/bsp-web:v1 .
+#    docker push registry.example.com/bsp-web:v1
+#
+# 2) On the droplet (repo clone or copy of infra/ + this file):
+#    export BSP_WEB_IMAGE=registry.example.com/bsp-web:v1
+#    docker compose -f compose.droplet.yml --profile web pull
+#    docker compose -f compose.droplet.yml --profile web up -d
+#
+# Let’s Encrypt overlay (optional):
+#    docker compose -f compose.droplet.yml -f compose.prod.yml --profile web --profile production up -d
+name: busservprov
+
+services:
+  web:
+    profiles:
+      - web
+    image: ${BSP_WEB_IMAGE:?Set BSP_WEB_IMAGE to your pre-built image, e.g. registry.example.com/bsp-web:v1}
+    logging:
+      driver: json-file
+      options:
+        max-size: 20m
+        max-file: '3'
+    environment:
+      NODE_ENV: production
+      NODE_OPTIONS: --max-old-space-size=384
+    mem_limit: 420m
+    networks:
+      - bsp
+
+  nginx:
+    profiles:
+      - web
+    build:
+      context: ./infra/nginx
+      dockerfile: Dockerfile
+    logging:
+      driver: json-file
+      options:
+        max-size: 20m
+        max-file: '3'
+    ports:
+      - '80:80'
+      - '443:443'
+    networks:
+      - bsp
+    depends_on:
+      - web
+
+networks:
+  bsp:
+    driver: bridge
