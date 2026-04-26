@@ -14,14 +14,14 @@ const VerticalFeatures = () => (
         description="Unlocking your body’s natural healing through the map of your soles"
         image="/assets/images/reflexology.webp"
         imageAlt="foot massage"
-        imageClassName="sm:scale-250"
+        imageClassName="scale-170 sm:scale-250 sm:-translate-x-12"
       />
       <VerticalFeatureRow
         title="Meridian Acupressure Massage"
         description="Deep tissue relief that balances your body through meridian mapping"
         image="/assets/images/massage_oil.webp"
         imageAlt="acupressure massage"
-        imageClassName="translate-x-12 sm:translate-x-0 sm:scale-250"
+        imageClassName="translate-x-12 scale-170 sm:translate-x-16 sm:scale-250"
         reverse
       />
       <VerticalFeatureRow
@@ -29,7 +29,7 @@ const VerticalFeatures = () => (
         description="Lifting the weight of the stress off your shoulders, one cup at a time"
         image="/assets/images/cupping.webp"
         imageAlt="cupping therapy"
-        imageClassName="sm:scale-250"
+        imageClassName="translate-x-2 scale-170 sm:translate-x-0 sm:scale-250"
       />
     </Section>
   </Background>
