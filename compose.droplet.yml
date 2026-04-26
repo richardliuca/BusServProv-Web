@@ -17,6 +17,7 @@ services:
   web:
     profiles:
       - web
+    container_name: NextJS-Web
     image: ${BSP_WEB_IMAGE:?Set BSP_WEB_IMAGE to your pre-built image, e.g. registry.example.com/bsp-web:v1}
     logging:
       driver: json-file
@@ -33,6 +34,7 @@ services:
   nginx:
     profiles:
       - web
+    container_name: NGINX-Web
     build:
       context: ./infra/nginx
       dockerfile: Dockerfile
