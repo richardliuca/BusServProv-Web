@@ -12,7 +12,8 @@ type IVerticalFeatureRowProps = {
 
 const VerticalFeatureRow = (props: IVerticalFeatureRowProps) => {
   const verticalFeatureClass = classNames(
-    'mt-20',
+    'mt-2',
+    'sm:mt-20',
     'flex',
     'flex-wrap',
     'items-center',
@@ -28,15 +29,19 @@ const VerticalFeatureRow = (props: IVerticalFeatureRowProps) => {
         <div className="mt-6 text-xl leading-9 text-primary-900">{props.description}</div>
       </div>
 
-      <div className="relative h-56 w-full p-6 sm:h-72 sm:w-1/2">
+      <div className="relative w-full p-2 sm:w-1/2 sm:p-6">
+        <div className="relative mx-auto w-full max-w-xl sm:max-w-none">
+          <div className="relative h-64 w-full sm:h-auto sm:aspect-[16/10]">
         <Image
           src={props.image}
           alt={props.imageAlt}
           fill
           style={{ objectFit: 'contain' }}
-          className={classNames('object-contain', props.imageClassName)}
+          className={classNames('object-contain object-center', props.imageClassName)}
           sizes="(max-width: 640px) 100vw, 50vw"
         />
+          </div>
+        </div>
       </div>
     </div>
   );
