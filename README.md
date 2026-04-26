@@ -189,7 +189,7 @@ docker compose -f compose.yml -f compose.prod.yml --profile web --profile produc
 Install a cron entry on the droplet to renew and reload nginx (path must match where the repo is cloned):
 
 ```bash
-15 3,15 * * * /absolute/path/to/BusServProv-Web/infra/scripts/renew-letsencrypt.sh >>/var/log/bsp-certbot-renew.log 2>&1
+15 3 1 * * /absolute/path/to/BusServProv-Web/infra/scripts/renew-letsencrypt.sh >>/var/log/bsp-certbot-renew.log 2>&1
 ```
 
 ## Environment variables
