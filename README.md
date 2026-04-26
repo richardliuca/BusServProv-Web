@@ -163,6 +163,7 @@ docker compose -f compose.yml -f compose.prod.yml --profile production run --rm 
   certonly \
   --dns-cloudflare \
   --dns-cloudflare-credentials /etc/letsencrypt/cloudflare.ini \
+  --dns-cloudflare-propagation-seconds 120 \
   -d panda-massage.com -d www.panda-massage.com \
   --email richardliuca@gmail.com \
   --agree-tos \
