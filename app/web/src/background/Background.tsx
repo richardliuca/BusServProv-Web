@@ -58,6 +58,8 @@ type IImageBackgroundProps = {
   alt?: string;
   /** Extra classes on the wrapper (layout, min-height, etc.). */
   className?: string;
+  /** Extra classes applied to the background image itself (object-position, etc.). */
+  imageClassName?: string;
   /** Preload/priority for above-the-fold hero images. */
   priority?: boolean;
   /** Responsive sizes hint for the background image. */
@@ -77,7 +79,7 @@ const ImageBackground = (props: IImageBackgroundProps) => {
         fill
         priority={props.priority}
         sizes={props.sizes ?? '100vw'}
-        className="object-cover object-center"
+        className={(props.imageClassName ?? 'object-cover object-center').trim()}
       />
       {overlay !== undefined && (
         <div className={imageBackgroundOverlayClasses[overlay]} aria-hidden />

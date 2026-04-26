@@ -15,6 +15,8 @@ const Hero = () => (
     overlayVariant="soft-vignette"
     priority
     sizes="100vw"
+    className="min-h-[520px] sm:min-h-[640px]"
+    imageClassName="object-cover object-[50%_18%] sm:object-center"
   >
     <Section id="home" yPadding="py-6">
       <NavbarTwoColumns logo={<Logo xl onDark />}>
@@ -45,7 +47,7 @@ const Hero = () => (
       </NavbarTwoColumns>
     </Section>
 
-    <Section yPadding="pt-20 pb-32">
+    <Section yPadding="pt-12 pb-20 sm:pt-20 sm:pb-32">
       <HeroOneButton
         headlineWrapClassName="inline-block max-w-4xl rounded-2xl border border-primary-50/20 bg-primary-950/45 px-6 py-5 text-left shadow-[0_12px_40px_rgba(0,0,0,0.35)] backdrop-blur-sm sm:px-10 sm:py-7 sm:text-center"
         title={
