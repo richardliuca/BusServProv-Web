@@ -2,8 +2,7 @@
   "name": "busservprov-web",
   "private": true,
   "workspaces": [
-    "app/*",
-    "packages/*"
+    "app/*"
   ],
   "scripts": {
     "build": "npm run build -ws --if-present",
