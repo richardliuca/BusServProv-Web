@@ -1,158 +1,11 @@
-# Profiles (pick one):
-#   docker compose -f compose.yml --profile Temporal up --build   — full stack
-#   docker compose -f compose.yml --profile web up --build      — Next.js + nginx only (/api/* and /temporal/ 502 until full stack runs)
+# Frontend-only stack: Next.js (web) behind nginx.
+#   docker compose -f compose.yml --profile web up --build              — production images
+#   docker compose -f compose.yml -f compose.dev.yml --profile web up   — hot reload
 name: busservprov
 
 services:
-  postgres:
-    profiles:
-      - Temporal
-    image: docker.io/library/postgres:15-alpine
-    logging:
-      driver: json-file
-      options:
-        max-size: 20m
-        max-file: '3'
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: temporal
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./infra/postgres/init-app-db.sql:/docker-entrypoint-initdb.d/01-init-app-db.sql
-    networks:
-      - bsp
-    healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U postgres -d temporal']
-      interval: 5s
-      timeout: 5s
-      retries: 10
-
-  elasticsearch:
-    profiles:
-      - Temporal
-    image: docker.io/library/elasticsearch:7.17.21
-    logging:
-      driver: json-file
-      options:
-        max-size: 20m
-        max-file: '3'
-    environment:
-      - discovery.type=single-node
-      - xpack.security.enabled=false
-      - 'ES_JAVA_OPTS=-Xms512m -Xmx512m'
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
-    networks:
-      - bsp
-    healthcheck:
-      test:
-        [
-          'CMD-SHELL',
-          "curl -fsS 'http://localhost:9200/_cluster/health?wait_for_status=yellow&timeout=5s' >/dev/null || exit 1",
-        ]
-      interval: 10s
-      timeout: 10s
-      retries: 30
-
-  temporal:
-    profiles:
-      - Temporal
-    image: docker.io/temporalio/auto-setup:1.25.2
-    logging:
-      driver: json-file
-      options:
-        max-size: 20m
-        max-file: '3'
-    depends_on:
-      postgres:
-        condition: service_healthy
-      elasticsearch:
-        condition: service_healthy
-    environment:
-      - DB=postgres12
-      - DB_PORT=5432
-      - POSTGRES_USER=postgres
-      - POSTGRES_PWD=postgres
-      - POSTGRES_SEEDS=postgres
-      - ENABLE_ES=true
-      - ES_SEEDS=elasticsearch
-      - ES_VERSION=v7
-    networks:
-      - bsp
-
-  temporal-ui:
-    profiles:
-      - Temporal
-    image: docker.io/temporalio/ui:2.32.0
-    logging:
-      driver: json-file
-      options:
-        max-size: 20m
-        max-file: '3'
-    depends_on:
-      - temporal
-    environment:
-      - TEMPORAL_ADDRESS=temporal:7233
-      - TEMPORAL_CORS_ORIGINS=http://localhost
-      # Required when UI is proxied under a path (see infra/nginx default.conf /temporal/).
-      # Without this, the SPA requests /assets/* at site root and Next.js returns HTML → blank UI.
-      - TEMPORAL_UI_PUBLIC_PATH=/temporal
-    networks:
-      - bsp
-
-  api:
-    profiles:
-      - Temporal
-    build:
-      context: .
-      dockerfile: app/api/Dockerfile
-      target: production
-    logging:
-      driver: json-file
-      options:
-        max-size: 20m
-        max-file: '3'
-    restart: on-failure
-    environment:
-      PORT: '3001'
-      TEMPORAL_ENABLED: 'true'
-      TEMPORAL_ADDRESS: temporal:7233
-      TEMPORAL_NAMESPACE: default
-      TEMPORAL_TASK_QUEUE: booking
-    networks:
-      - bsp
-    depends_on:
-      - temporal
-
-  worker:
-    profiles:
-      - Temporal
-    build:
-      context: .
-      dockerfile: app/worker/Dockerfile
-      target: production
-    logging:
-      driver: json-file
-      options:
-        max-size: 20m
-        max-file: '3'
-    restart: on-failure
-    environment:
-      TEMPORAL_ADDRESS: temporal:7233
-      TEMPORAL_NAMESPACE: default
-      TEMPORAL_TASK_QUEUE: booking
-      WORKFLOWS_PATH: /repo/packages/temporal/src/workflows.ts
-    networks:
-      - bsp
-    depends_on:
-      - temporal
-
   web:
     profiles:
-      - Temporal
       - web
     build:
       context: .
@@ -170,7 +23,6 @@ services:
 
   nginx:
     profiles:
-      - Temporal
       - web
     build:
       context: ./infra/nginx
@@ -191,6 +43,3 @@ services:
 networks:
   bsp:
     driver: bridge
-
-volumes:
-  postgres_data:

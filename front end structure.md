@@ -6,13 +6,13 @@ Paths below are from the **repository root**.
 
 ## Loading / render sequence (App Router)
 
-On a visit to `/`, Next.js resolves the route, runs the **root layout** (once per tree), then renders the **page** as its `children`. Global CSS is pulled in from the layout. The booking form is a **client component**; everything above it in the tree is still server-rendered HTML, then React **hydrates** the client subtree.
+On a visit to `/`, Next.js resolves the route, runs the **root layout** (once per tree), then renders the **page** as its `children`. Global CSS is pulled in from the layout. The current MVP is fully server-rendered (no client components mounted on the home page).
 
 ```mermaid
 flowchart TD
   A[Browser requests /] --> B[next start / production server]
   B --> C["app/web/src/app/layout.tsx — RootLayout"]
-  C --> D["Import global.css — Tailwind v4 + Preline sources + app theme"]
+  C --> D["Import global.css — Tailwind v4 + app theme"]
   C --> E["Metadata: title, description from AppConfig"]
   C --> F["app/web/src/app/page.tsx — HomePage"]
   F --> G["app/web/src/templates/Base.tsx — page shell + section order"]
@@ -21,15 +21,13 @@ flowchart TD
   G --> H3[PricingSection — server]
   G --> H4[Banner — server]
   G --> H5[Footer (Location) — server]
-  C --> P["app/web/src/components/PrelineProvider.tsx — client; (re)inits Preline on route change"]
 ```
 
 ### Practical meaning
 
 - **Edit structure / order of sections**: `app/web/src/templates/Base.tsx` (this is the single “table of contents” for the landing page).
 - **Site-wide chrome** (document shell, default title/description, global styles): `app/web/src/app/layout.tsx`, `app/web/src/utils/AppConfig.ts`, `app/web/src/styles/global.css`, `app/web/src/styles/app-theme.css`.
-- **Preline JS behavior** (dropdowns, etc.): `app/web/src/components/PrelineProvider.tsx` (client component imported by `RootLayout`).
-- **Interactive behavior** (form state, `fetch`): `app/web/src/components/BookingRequestForm.tsx` and any other file with `'use client'`.
+- **Interactive behavior** (client-side state, `fetch`): add a file with `'use client'` when needed (none is mounted in the current MVP).
 - **Look and feel** (colors, spacing, typography): often `app/web/tailwind.config.ts` + `app/web/src/styles/global.css` + the specific section components.
 
 ## Page zones → files to edit
@@ -43,9 +41,9 @@ flowchart TD
 | **Mid-page CTA band** | `app/web/src/templates/Banner.tsx` | `app/web/src/cta/CTABanner.tsx`, `app/web/src/button/Button.tsx` |
 | **Footer** | `app/web/src/templates/Footer.tsx` | `app/web/src/footer/CenteredFooter.tsx`, `app/web/src/footer/FooterCopyright.tsx`, `app/web/src/footer/FooterIconList.tsx`, `Logo` |
 
-### Not currently mounted (but present)
+### Roadmap: booking section
 
-- **Booking request section**: `app/web/src/templates/BookingSection.tsx` contains the `BookingRequestForm` client component, but `Base.tsx` currently does **not** render `<BookingSection />`. If you want the booking workflow starter visible on the home page, add it to `Base.tsx` (and optionally add a nav link to `#booking` in `Hero.tsx`).
+The booking request form was removed for the frontend-only MVP. To add it back later, create a new section component under `app/web/src/templates/`, mount it in `Base.tsx`, and wire its `fetch` calls to a backend (a Next.js Route Handler under `app/web/src/app/api/**/route.ts`, or an external API via `NEXT_PUBLIC_API_URL`).
 
 ### Entry points
 
