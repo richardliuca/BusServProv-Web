@@ -1,11 +1,13 @@
+import { Navbar } from '@/navigation/Navbar';
 import { Banner } from './Banner';
-import { PricingSection } from './PricingSection';
 import { Footer } from './Footer';
 import { Hero } from './Hero';
+import { PricingSection } from './PricingSection';
 import { VerticalFeatures } from './VerticalFeatures';
 
 const Base = () => (
-  <div className="text-primary-900 antialiased">
+  <div className="antialiased">
+    <Navbar />
     <Hero />
     <VerticalFeatures />
     <PricingSection />

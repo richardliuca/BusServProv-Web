@@ -3,3 +3,19 @@
 
 /* Theme tokens */
 @import './app-theme.css';
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* Keep anchored sections clear of the sticky navbar */
+  [id] {
+    scroll-margin-top: 5.5rem;
+  }
+
+  ::selection {
+    background-color: var(--color-primary-200);
+    color: var(--color-ink);
+  }
+}

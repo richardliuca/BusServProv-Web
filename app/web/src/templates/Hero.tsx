@@ -1,78 +1,87 @@
-import Link from 'next/link';
+import Image from 'next/image';
 
-import { ImageBackground } from '@/background/Background';
 import { Button } from '@/button/Button';
-import { HeroOneButton } from '@/hero/HeroOneButton';
-import { Section } from '@/layout/Section';
-import { NavbarTwoColumns } from '@/navigation/NavbarTwoColumns';
 import { AppConfig } from '@/utils/AppConfig';
-import { Logo } from './Logo';
+
+const HIGHLIGHTS = [
+  'Walk-ins welcome',
+  'Traditional Chinese techniques',
+  'In the heart of Chinatown',
+];
 
 const Hero = () => (
-  <ImageBackground
-    src="/assets/images/hero_bg.webp"
-    alt="Relaxing spa background"
-    overlayVariant="soft-vignette"
-    priority
-    sizes="100vw"
-    className="min-h-[520px] sm:min-h-[640px]"
-    imageClassName="object-cover object-[50%_18%] sm:object-center"
-  >
-    <Section id="home" yPadding="py-6">
-      <NavbarTwoColumns logo={<Logo xl onDark />}>
-        <li>
-          <Link
-            className="text-primary-50 drop-shadow-[0_2px_6px_rgba(0,0,0,0.45)] transition-colors hover:text-primary-100"
-            href="#services"
-          >
-            Services
-          </Link>
-        </li>
-        <li>
-          <Link
-            className="text-primary-50 drop-shadow-[0_2px_6px_rgba(0,0,0,0.45)] transition-colors hover:text-primary-100"
-            href="#pricing"
-          >
-            Pricing
-          </Link>
-        </li>
-        <li>
-          <Link
-            className="text-primary-50 drop-shadow-[0_2px_6px_rgba(0,0,0,0.45)] transition-colors hover:text-primary-100"
-            href="#location"
-          >
-            Location
-          </Link>
-        </li>
-      </NavbarTwoColumns>
-    </Section>
+  <section id="home" className="relative min-h-[560px] overflow-hidden sm:min-h-[680px]">
+    <Image
+      src="/assets/images/hero_bg.webp"
+      alt="Massage therapist working in a warm candle-lit room"
+      fill
+      priority
+      sizes="100vw"
+      className="object-cover object-[50%_25%]"
+    />
+    {/* Warm scrim: readable text on the left, photo breathing on the right */}
+    <div
+      className="absolute inset-0 bg-gradient-to-r from-cocoa/90 via-cocoa/60 to-cocoa/20"
+      aria-hidden
+    />
+    <div
+      className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-cocoa/70 to-transparent"
+      aria-hidden
+    />
 
-    <Section yPadding="pt-12 pb-20 sm:pt-20 sm:pb-32">
-      <HeroOneButton
-        headlineWrapClassName="inline-block max-w-4xl rounded-2xl border border-primary-50/20 bg-primary-950/45 px-6 py-5 text-left shadow-[0_12px_40px_rgba(0,0,0,0.35)] backdrop-blur-sm sm:px-10 sm:py-7 sm:text-center"
-        title={
-          <>
-            <span className="block text-primary-50 drop-shadow-[0_2px_8px_rgba(0,0,0,0.55)]">
-              Local Chinatown Mom and Pop
-            </span>
-            <span className="mt-2 block text-primary-400 drop-shadow-[0_2px_6px_rgba(0,0,0,0.45)]">
-              Spa & Massage Therapist
-            </span>
-          </>
-        }
-        description={
-          <span className="text-olive font-bold leading-snug drop-shadow-[0_1px_2px_rgba(0,0,0,0.35)]">
-            Come and let us help you relieve stress and relax in serenity.
-          </span>
-        }
-        button={
+    <div className="relative z-10 mx-auto flex min-h-[560px] max-w-6xl flex-col justify-center px-4 py-20 sm:min-h-[680px] sm:px-6 sm:py-28">
+      <div className="max-w-2xl">
+        <span className="inline-flex items-center gap-2 rounded-full border border-linen/25 bg-linen/10 px-4 py-1.5 text-sm font-medium text-linen/90 backdrop-blur-sm">
+          <span className="size-1.5 rounded-full bg-primary-300" aria-hidden />
+          Your local mom &amp; pop massage studio
+        </span>
+
+        <h1 className="mt-6 font-display text-5xl font-semibold leading-hero tracking-tight text-linen sm:text-6xl">
+          Unwind, restore,
+          <br />
+          <span className="text-primary-300">and feel at home.</span>
+        </h1>
+
+        <p className="mt-6 max-w-xl text-lg leading-relaxed text-linen/85 sm:text-xl">
+          Chinese-influenced reflexology, acupressure, and therapeutic massage
+          in the heart of Los Angeles Chinatown. Come let us help you relieve
+          stress and relax in serenity.
+        </p>
+
+        <div className="mt-9 flex flex-wrap items-center gap-4">
           <a href={`tel:${AppConfig.phoneTel}`}>
-            <Button xl>Call or Text us for your appointment !</Button>
+            <Button xl>Call or text {AppConfig.phoneDisplay}</Button>
           </a>
-        }
-      />
-    </Section>
-  </ImageBackground>
+          <a href="#services">
+            <Button xl variant="light">
+              Explore services
+            </Button>
+          </a>
+        </div>
+
+        <ul className="mt-10 flex flex-wrap gap-x-6 gap-y-2 text-sm text-linen/70">
+          {HIGHLIGHTS.map((item) => (
+            <li key={item} className="flex items-center gap-2">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="size-4 text-primary-300"
+                aria-hidden
+              >
+                <path d="M20 6 9 17l-5-5" />
+              </svg>
+              {item}
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  </section>
 );
 
 export { Hero };

@@ -1,3 +1,5 @@
+import Image from 'next/image';
+
 import { AppConfig } from '../utils/AppConfig';
 
 type ILogoProps = {
@@ -7,24 +9,21 @@ type ILogoProps = {
 };
 
 const Logo = (props: ILogoProps) => {
-  const size = props.xl ? '88' : '64';
-  const fontStyle = props.xl
-    ? 'font-semibold text-3xl'
-    : 'font-semibold text-xl';
-  const colorStyle = props.onDark
-    ? 'text-cornsilk drop-shadow-[0_2px_8px_rgba(0,0,0,0.55)]'
-    : 'text-black-forest';
+  const size = props.xl ? 56 : 44;
+  const fontStyle = props.xl ? 'text-2xl' : 'text-xl';
+  const colorStyle = props.onDark ? 'text-linen' : 'text-ink';
 
   return (
-    <span className={`inline-flex items-center ${colorStyle} ${fontStyle}`}>
-      <img
-        className="mr-2 inline-block"
+    <span
+      className={`inline-flex items-center gap-2.5 font-display font-semibold tracking-tight ${colorStyle} ${fontStyle}`}
+    >
+      <Image
         src="/assets/logo/logo.png"
         alt={`${AppConfig.site_name} logo`}
         width={size}
         height={size}
+        className="shrink-0"
       />
-
       {AppConfig.site_name}
     </span>
   );
